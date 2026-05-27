@@ -1,3 +1,9 @@
+---
+name: reuse-discovery
+description: Reuse and landscape discovery — ranked map of existing bank systems covering a capability need, with owner teams, integration contracts, and explicit anti-recommendations.
+menu-code: RD
+---
+
 # Reuse & Landscape Discovery
 
 **Language:** общайся на `{communication_language}`, отчёт пиши на `{document_output_language}`.
@@ -19,11 +25,33 @@
 - Стоимость интеграции / расширения (грубая оценка: low / medium / high).
 - Контракт интеграции (sync API через API Gateway, event через Event Hub, ETL в Data Lake, ...).
 
+## Degraded Mode
+
+Если `landscape_registry` missing — reuse discovery выполнить невозможно. Не имитируй реестр из общих знаний. Сообщи пользователю: «Реестр систем не загружен — reuse discovery недоступна. Укажи системы вручную или настрой `landscape_registry_path` в customize.toml.» Предложи перейти к architectural-consultation, где пользователь сам назовёт известные ему системы. Если `target_architecture` missing — пропусти шаг 3 (сверка с target arch), отметь все рекомендации как непроверенные на alignment.
+
+## Greenfield Mode
+
+Если registry-сканирование по релевантным capability areas вернуло **ноль кандидатов** — это не провал, это сигнал: банк строит в этой области впервые (или область не охвачена реестром). Три пустые таблицы без контекста — тупик; не возвращай их.
+
+**Шаги в Greenfield Mode:**
+
+1. **Подтверди полноту сканирования.** Перечисли capability areas, которые ты проверил — чтобы пользователь мог убедиться, что ничего не пропущено.
+
+2. **Выпиши применимые BIAN reference patterns.** BIAN — признанный отраслевой стандарт; цитирование его Service Domains легитимно даже при пустом реестре. Укажи 2–4 BIAN Service Domain, наиболее близких к задаче, с кратким объяснением применимости.
+
+3. **Предложи структуру первого registry-entry.** Дай черновик: `system_name`, `domain`, `capability_area`, `owner` (предположительный), `integration_contract`, `status: new`. Это снижает барьер к первой записи в реестре.
+
+4. **Укажи registry-образцы из смежных областей.** Если в реестре есть записи из соседних доменов — назови 1–2 как образец оформления для новой записи.
+
+5. **Proceed to `architectural-consultation`.** В greenfield-контексте design options важнее reuse map — явно предложи этот следующий шаг.
+
+**Citability в greenfield-контексте:** рекомендации на основе BIAN помечай как `[BIAN baseline]`, а не как registry-факт. Это честная цитируемость без имитации несуществующих записей.
+
 ## Approach
 
 1. **Декомпозируй задачу** в capability terms (BIAN или внутренняя capability map банка). Не «нужен сервис X» — а «нужна возможность Y для домена Z».
 
-2. **Пройди landscape registry** (`{agent.landscape_registry_path}`) по релевантным capability areas. Не ограничивайся очевидными системами — Core Banking может покрывать что-то, что выглядит как payment-задача; DWH может покрывать что-то, что выглядит как online-задача.
+2. **Пройди landscape registry** (`{agent.landscape_registry_path}`) по релевантным capability areas. Не ограничивайся очевидными системами — Core Banking может покрывать что-то, что выглядит как payment-задача; DWH может покрывать что-то, что выглядит как online-задача. Если сканирование вернуло **ноль кандидатов** по всем релевантным capability areas — не заполняй пустые таблицы, переходи в **Greenfield Mode** (см. выше).
 
 3. **Сверь с target architecture** (`{agent.target_architecture_path}`): какое из найденных решений в целевой картине растёт, какое уходит на покой. Не рекомендуй sunset-системы для долгосрочных интеграций.
 
@@ -80,4 +108,40 @@ Reuse-карта завершена, когда:
 
 ## Следующий шаг
 {одно предложение: к кому идти, что спросить}
+```
+
+### Greenfield-вариант (ноль кандидатов в реестре)
+
+```
+# Reuse Map: {задача} — Greenfield
+
+## Что нужно
+- Capability area: ...
+- Домен: ...
+- Ожидаемый объём / SLA: ...
+
+## Проверенные capability areas
+| Capability Area | Кандидаты найдены |
+|---|---|
+| ... | нет |
+
+## BIAN Reference Patterns [BIAN baseline]
+| BIAN Service Domain | Применимость | Ссылка |
+|---|---|---|
+
+## Черновик первого registry-entry
+```toml
+system_name      = "..."
+domain           = "..."
+capability_area  = "..."
+owner            = "..."          # предположительный
+integration_contract = "..."      # sync API / event / ETL
+status           = "new"
+```
+
+## Registry-образцы из смежных областей
+{1–2 существующие записи реестра как образец оформления}
+
+## Следующий шаг
+Кандидаты не найдены — переход к architectural-consultation для проектирования с нуля.
 ```

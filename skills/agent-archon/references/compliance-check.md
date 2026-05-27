@@ -1,3 +1,9 @@
+---
+name: compliance-check
+description: Structured compliance and target-architecture audit producing a per-requirement checklist with statuses, source citations, and a single-sentence can-proceed / conditional / blocked verdict.
+menu-code: CC
+---
+
 # Compliance & Target-Architecture Check
 
 **Language:** общайся на `{communication_language}`, отчёт пиши на `{document_output_language}`.
@@ -19,6 +25,10 @@
 2. **Утверждённая целевая архитектура** — соответствие распределению capabilities, owner'ам систем, паттернам интеграции из `{agent.target_architecture_path}`.
 3. **Принципы банка** — `{agent.architecture_principles_path}` пункт за пунктом.
 4. **Стандарты данных и интеграции** — каноническая модель, паттерны event-streaming, API contracts.
+
+## Degraded Mode
+
+Если `compliance_corpus_path` missing — проверяй только на основе публичных требований (152-ФЗ, 115-ФЗ, PCI DSS, GDPR) и явно помечай каждую строку отчёта: «источник: публичный текст закона, внутренние политики банка не загружены». Если `target_architecture` missing — раздел «Целевая архитектура» в чек-листе получает статус `needs-clarification` для всех строк. Если `architecture_principles` missing — раздел «Принципы банка» аналогично. Блок Knowledge Disclosure и статус `compliance_corpus` обязательно присутствуют в начале отчёта.
 
 ## Approach
 

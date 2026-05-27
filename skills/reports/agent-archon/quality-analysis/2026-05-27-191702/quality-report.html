@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BMad Method · Quality Analysis: agent-archon</title>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --surface2: #21262d; --border: #30363d;
+  --text: #e6edf3; --text-muted: #8b949e; --text-dim: #6e7681;
+  --critical: #f85149; --high: #f0883e; --medium: #d29922; --low: #58a6ff;
+  --strength: #3fb950; --suggestion: #a371f7;
+  --accent: #58a6ff; --accent-hover: #79c0ff;
+  --brand: #a371f7;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #ffffff; --surface: #f6f8fa; --surface2: #eaeef2; --border: #d0d7de;
+    --text: #1f2328; --text-muted: #656d76; --text-dim: #8c959f;
+    --critical: #cf222e; --high: #bc4c00; --medium: #9a6700; --low: #0969da;
+    --strength: #1a7f37; --suggestion: #8250df;
+    --accent: #0969da; --accent-hover: #0550ae;
+    --brand: #8250df;
+  }
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.5; padding: 2rem; max-width: 900px; margin: 0 auto; }
+.brand { color: var(--brand); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 0.25rem; }
+h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+.subtitle { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem; }
+.subtitle a { color: var(--accent); text-decoration: none; }
+.subtitle a:hover { text-decoration: underline; }
+.portrait { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1.25rem; margin-bottom: 1.5rem; }
+.portrait-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+.portrait-icon { font-size: 2rem; }
+.portrait-name { font-size: 1.25rem; font-weight: 700; }
+.portrait-title { font-size: 0.9rem; color: var(--text-muted); }
+.portrait-desc { font-size: 0.95rem; color: var(--text-muted); line-height: 1.6; font-style: italic; }
+.grade { font-size: 2.5rem; font-weight: 700; margin: 0.5rem 0; }
+.grade-Excellent { color: var(--strength); }
+.grade-Good { color: var(--low); }
+.grade-Fair { color: var(--medium); }
+.grade-Poor { color: var(--critical); }
+.narrative { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.6; }
+.badge { display: inline-flex; align-items: center; padding: 0.15rem 0.5rem; border-radius: 2rem; font-size: 0.75rem; font-weight: 600; }
+.badge-critical { background: color-mix(in srgb, var(--critical) 20%, transparent); color: var(--critical); }
+.badge-high { background: color-mix(in srgb, var(--high) 20%, transparent); color: var(--high); }
+.badge-medium { background: color-mix(in srgb, var(--medium) 20%, transparent); color: var(--medium); }
+.badge-low { background: color-mix(in srgb, var(--low) 20%, transparent); color: var(--low); }
+.badge-strength { background: color-mix(in srgb, var(--strength) 20%, transparent); color: var(--strength); }
+.badge-good { background: color-mix(in srgb, var(--strength) 15%, transparent); color: var(--strength); }
+.badge-attention { background: color-mix(in srgb, var(--medium) 15%, transparent); color: var(--medium); }
+.section { border: 1px solid var(--border); border-radius: 0.5rem; margin: 0.75rem 0; overflow: hidden; }
+.section-header { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; background: var(--surface); cursor: pointer; user-select: none; }
+.section-header:hover { background: var(--surface2); }
+.section-header .arrow { font-size: 0.7rem; transition: transform 0.15s; color: var(--text-muted); width: 1rem; }
+.section-header.open .arrow { transform: rotate(90deg); }
+.section-header .label { font-weight: 600; flex: 1; }
+.section-header .actions { display: flex; gap: 0.5rem; }
+.section-body { display: none; }
+.section-body.open { display: block; }
+.cap-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-top: 1px solid var(--border); }
+.cap-row:hover { background: var(--surface); }
+.cap-name { font-weight: 600; font-size: 0.9rem; flex: 1; }
+.cap-file { font-family: var(--mono); font-size: 0.75rem; color: var(--text-dim); }
+.cap-findings { display: none; padding: 0.5rem 1rem 0.5rem 2rem; border-top: 1px solid var(--border); background: var(--bg); }
+.cap-findings.open { display: block; }
+.cap-finding { font-size: 0.85rem; padding: 0.25rem 0; color: var(--text-muted); }
+.item { padding: 0.75rem 1rem; border-top: 1px solid var(--border); }
+.item:hover { background: var(--surface); }
+.item-title { font-weight: 600; font-size: 0.9rem; }
+.item-file { font-family: var(--mono); font-size: 0.75rem; color: var(--text-muted); }
+.item-desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+.item-action { font-size: 0.85rem; margin-top: 0.25rem; }
+.item-action strong { color: var(--strength); }
+.opp { padding: 1rem; border-top: 1px solid var(--border); }
+.opp-header { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.opp-name { font-weight: 600; font-size: 1rem; flex: 1; }
+.opp-count { font-size: 0.8rem; color: var(--text-muted); }
+.opp-desc { font-size: 0.9rem; color: var(--text-muted); margin: 0.5rem 0; }
+.opp-impact { font-size: 0.85rem; color: var(--text-dim); font-style: italic; }
+.opp-findings { margin-top: 0.75rem; padding-left: 1rem; border-left: 2px solid var(--border); display: none; }
+.opp-findings.open { display: block; }
+.opp-finding { font-size: 0.85rem; padding: 0.25rem 0; color: var(--text-muted); }
+.opp-finding .source { font-size: 0.75rem; color: var(--text-dim); }
+.btn { background: none; border: 1px solid var(--border); border-radius: 0.25rem; padding: 0.3rem 0.7rem; cursor: pointer; color: var(--text-muted); font-size: 0.8rem; transition: all 0.15s; }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+.btn-primary:hover { background: var(--accent-hover); }
+.strength-item { padding: 0.5rem 1rem; border-top: 1px solid var(--border); }
+.strength-item .title { font-weight: 600; font-size: 0.9rem; color: var(--strength); }
+.strength-item .detail { font-size: 0.85rem; color: var(--text-muted); }
+.analysis-section { padding: 0.75rem 1rem; border-top: 1px solid var(--border); }
+.analysis-section h4 { font-size: 0.9rem; margin-bottom: 0.25rem; }
+.analysis-section p { font-size: 0.85rem; color: var(--text-muted); }
+.analysis-finding { font-size: 0.85rem; padding: 0.25rem 0 0.25rem 1rem; border-left: 2px solid var(--border); margin: 0.25rem 0; color: var(--text-muted); }
+.recs { padding: 0.75rem 1rem; border-top: 1px solid var(--border); }
+.rec { padding: 0.3rem 0; font-size: 0.9rem; }
+.rec-rank { font-weight: 700; color: var(--accent); margin-right: 0.5rem; }
+.rec-resolves { font-size: 0.8rem; color: var(--text-dim); }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; align-items: center; justify-content: center; }
+.modal-overlay.visible { display: flex; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1.5rem; width: 90%; max-width: 700px; max-height: 80vh; overflow-y: auto; }
+.modal h3 { margin-bottom: 0.75rem; }
+.modal pre { background: var(--bg); border: 1px solid var(--border); border-radius: 0.375rem; padding: 1rem; font-family: var(--mono); font-size: 0.8rem; white-space: pre-wrap; word-wrap: break-word; max-height: 50vh; overflow-y: auto; }
+.modal-actions { display: flex; gap: 0.75rem; margin-top: 1rem; justify-content: flex-end; }
+</style>
+</head>
+<body>
+
+<div class="brand">BMad Method</div>
+<h1>Quality Analysis: <span id="skill-name"></span></h1>
+<div class="subtitle" id="subtitle"></div>
+
+<div id="portrait"></div>
+<div id="grade-area"></div>
+<div class="narrative" id="narrative"></div>
+
+<div id="capabilities-section"></div>
+<div id="broken-section"></div>
+<div id="opportunities-section"></div>
+<div id="strengths-section"></div>
+<div id="recommendations-section"></div>
+<div id="detailed-section"></div>
+
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h3 id="modal-title">Generated Prompt</h3>
+    <pre id="modal-content"></pre>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Close</button>
+      <button class="btn btn-primary" onclick="copyModal()">Copy to Clipboard</button>
+    </div>
+  </div>
+</div>
+
+<script id="report-data" type="application/json">{"meta": {"skill_name": "agent-archon", "skill_path": "C:/Users/igor_/developer/bmad-ent-arch-agent/skills/agent-archon", "timestamp": "2026-05-27T19:17:02Z", "scanner_count": 7, "type": "agent"}, "agent_profile": {"icon": "🏛️", "display_name": "Archon", "title": "Корпоративный архитектор банка", "portrait": "Archon is a grey-haired Chief Enterprise Architect who has spent twenty years at the intersection of bank business and systems — fluent in TOGAF, ArchiMate, BIAN, DDD, and every compliance framework from 152-FZ to PCI DSS. He thinks in 3–5 year horizons and operates at the whiteboard: laying out trade-offs rather than dispensing verdicts, ensuring every recommendation is citable to a specific principle, regulation, or landscape entry. His singular mission is to catch when an initiative drifts from the bank's approved target architecture — even when nobody else is paying attention."}, "capabilities": [{"name": "Архитектурная консультация", "file": "references/architectural-consultation.md", "status": "good", "finding_count": 1, "findings": [{"severity": "medium", "title": "Missing handoff to artifact-generation in completion criteria", "detail": "Completion criteria only suggest proceeding to adversarial-review; the most natural post-consultation next step — formalizing the chosen option into an ADR or Solution Design — is not mentioned."}]}, {"name": "Adversarial Review", "file": "references/adversarial-review.md", "status": "good", "finding_count": 1, "findings": [{"severity": "low", "title": "compliance_corpus_path not loaded despite compliance axis", "detail": "adversarial-review.md performs compliance checks across its 8 axes but does not load {agent.compliance_corpus_path}, meaning operator-customized internal compliance documents are silently ignored."}]}, {"name": "Compliance & Target Check", "file": "references/compliance-check.md", "status": "good", "finding_count": 1, "findings": [{"severity": "low", "title": "Compliance scope filter is illustrative, not deterministic", "detail": "The domain-to-regulation mapping (cards → PCI DSS, individuals → 152-FZ) is given as examples without a decision rule, leaving scope selection ambiguous for borderline cases."}]}, {"name": "Reuse & Landscape Discovery", "file": "references/reuse-discovery.md", "status": "good", "finding_count": 1, "findings": [{"severity": "low", "title": "Registry scan is an LLM-tax candidate for scripting", "detail": "The landscape registry scan in Approach Step 2 is a structured-data filter that a pre-pass script could execute, saving 200–400 tokens per invocation."}]}, {"name": "Draft Architectural Artifact", "file": "references/artifact-generation.md", "status": "needs-attention", "finding_count": 3, "findings": [{"severity": "medium", "title": "Three full document templates embedded inline — 320 lines total", "detail": "ADR, Solution Design, and ARB Package templates (~183 fenced lines) are embedded in the procedural guidance prompt, more than doubling its size and coupling template maintenance to procedural logic."}, {"severity": "medium", "title": "Anchoring step re-reads already-loaded knowledge bases sequentially", "detail": "The 'Anchoring в Bank Context' section lists three sequential reads of sources loaded at activation, creating redundant I/O and presenting them as an ordered pass rather than a cross-reference."}, {"severity": "medium", "title": "--headless:arb-prep lists 4 reads with no parallelization hint", "detail": "Headless ARB prep instructs reading the artifact and three knowledge bases as a sequential list; all four are independent and could be batched in a single round-trip."}]}], "narrative": "Archon is an unusually well-engineered domain agent: zero structural defects, five coherent capabilities with full degraded-mode coverage, and a citability principle operationalized consistently across every output format. The primary opportunity is a cluster of efficiency and workflow-continuity improvements — the agent works well in a single-capability session but loses context across capability transitions, and its headless modes lack the structured output contracts needed for CI/CD integration.", "grade": "Good", "broken": [], "opportunities": [{"name": "Sequential I/O on Hot Paths", "description": "Multiple activation and capability steps instruct the LLM to perform independent file reads sequentially: the three knowledge bases in Step 5, the anchoring pass in artifact-generation, and four reads in --headless:arb-prep. Knowledge-status assembly, glob expansion, and date/slug generation are also fully deterministic operations currently paid for in LLM tokens on every session.", "severity": "medium", "impact": "Eliminating sequential reads reduces activation latency by an estimated 30–50% on cold start and saves 450–1,000 tokens per typical session.", "action": "Restructure Step 5 to batch all three knowledge-base reads in one parallel call. Reword artifact-generation anchoring to 'cross-reference already-loaded knowledge bases.' Add explicit parallel-batch instruction to --headless:arb-prep. Build activation_prepass.py to handle knowledge-status assembly, glob expansion, and date/slug generation.", "finding_count": 7, "findings": ["SKILL.md Step 5: three independent knowledge-base reads presented as sequential steps", "artifact-generation.md lines 65–69: anchoring step re-reads already-loaded bases", "artifact-generation.md line 318: --headless:arb-prep lists 4 sequential reads", "SKILL.md Steps 3+5+7: knowledge status assembly is deterministic string templating", "SKILL.md lines 58–60: glob expansion for persistent_facts file entries", "activation: date stamp and slug generation are deterministic clock/string ops", "reuse-discovery.md Approach Step 2: registry scan is a structured-data filter"]}, {"name": "Headless Modes Lack Automation Contracts", "description": "The three headless flags represent forward-thinking governance automation design, but none specify structured output formats, exit-code behavior for blocker findings, or error handling for unwritable output paths. --headless:landscape-drift-scan also has no dedicated reference section.", "severity": "medium", "impact": "Without structured output contracts, CI pipelines and governance dashboards cannot consume headless outputs reliably. The full automation value of the headless architecture cannot be realized.", "action": "Add a YAML front-matter block to every headless report with run_date, mode, knowledge_status, and named counts (blockers, gaps, drift_items, compliant). Define exit-failure for any blocker finding. Add a Headless: --headless:landscape-drift-scan section to architectural-consultation.md or a new references/landscape-drift.md.", "finding_count": 5, "findings": ["All three headless modes: no structured output format — Markdown only", "All three headless modes: no exit-code contract for blocker findings", "--headless:compliance-audit: no error handling spec for unwritable output path", "--headless:landscape-drift-scan: documented only inline in SKILL.md Step 7 without dedicated reference section", "Enhancement Opportunities: no headless dry-run mode for pipeline testing"]}, {"name": "Workflow Continuity Across Capability Transitions", "description": "When a user moves from architectural-consultation to adversarial-review to artifact-generation, each capability starts cold. Options explored, systems identified, compliance flags raised, and trade-off decisions made in prior capabilities are not explicitly carried forward. The consultation completion criteria also omit artifact-generation as a natural next step.", "severity": "medium", "impact": "Multi-capability sessions feel like disconnected tool invocations. Users re-answer questions they already answered. The most natural post-consultation action (drafting an ADR) requires users to know it exists and navigate back to the capability table.", "action": "Define a lightweight session context object (initiative name/slug, identified systems, compliance flags raised, options generated) that each capability writes to and reads from. Add artifact-generation as a handoff option in architectural-consultation completion criteria. Add an explicit context-recap opening step to adversarial-review and artifact-generation.", "finding_count": 4, "findings": ["architectural-consultation.md: completion criteria omit artifact-generation as next step", "architectural-consultation.md Approach: drift check is reactive at output time, not during options discussion", "Cross-capability: no session context object carried between capability transitions", "Enhancement Opportunities: multi-capability chains result in repeated discovery questions"]}, {"name": "Customization Surface Gaps for Org-Specific Parameters", "description": "compliance_corpus_path is declared as a first-class override but silently ignored by adversarial-review. ADR numbering and ARB calendar date are org-varying operational parameters resolved by inference. strategy_path load semantics are inconsistent across capabilities without documentation.", "severity": "low", "impact": "Operators who invest in customizing knowledge sources receive incomplete coverage. ADR numbering collisions are likely on multi-author teams. Operators may be surprised when declared TOML knobs have no effect in certain capabilities.", "action": "Add load step for {agent.compliance_corpus_path} to adversarial-review.md (or document scope in customize.toml). Add adr_index_path and arb_next_session_date scalars to customize.toml. Add one-line comment to strategy_path clarifying which capabilities consume it.", "finding_count": 4, "findings": ["adversarial-review.md: compliance_corpus_path declared in TOML but not loaded", "artifact-generation.md: ADR {NNN} sequence has no grounding source — collision risk on multi-author teams", "artifact-generation.md ARB Package: ARB date hardcoded as TBD with no configurable scalar", "customize.toml strategy_path: loaded by only 2 of 5 capabilities without documentation"]}, {"name": "First-Use Experience and Routing UX", "description": "The frontmatter description opens with Russian before the English 'Use when' trigger phrase, risking harness routing issues. New users with no knowledge files get a Knowledge Disclosure block but no setup path. Capability routing is purely intent-based with no soft confirmation before committing to a mode.", "severity": "low", "impact": "Cold-start experience for new deployments produces degraded output without clear remediation path. Confused users and first-timers may receive full output in the wrong capability before realizing the mismatch.", "action": "Move 'Use when' clause to start of frontmatter description. Add conditional branch in Step 7: if all three key files are missing AND interactive, offer brief setup path. Add single-sentence routing confirmation before loading any capability prompt.", "finding_count": 3, "findings": ["SKILL.md:3 frontmatter: Russian sentence precedes English 'Use when' trigger phrase", "Step 7 routing: no setup mode when all three key knowledge files are missing", "Step 7 routing: purely intent-based capability selection with no soft confirmation gate"]}], "strengths": [{"title": "Citability as a structural invariant", "detail": "The citability principle is operationalized in a capability-appropriate way in all five prompts — a severity downgrade rule in adversarial-review, an anti-pattern in compliance-check, the [NEEDS INPUT:] convention in artifact-generation. One principle, five domain-specific enforcement mechanisms. This is the agent's single most valuable differentiator."}, {"title": "Degraded mode coverage across every capability", "detail": "All five capability prompts define exactly what to do when each knowledge file is missing, differing based on each capability's dependency profile. The Knowledge Disclosure block surfaces missing files before any response. Reuse-discovery goes further with a full Greenfield Mode rather than just a degraded mode. This is robust design that anticipates real operational conditions."}, {"title": "Greenfield Mode in reuse-discovery", "detail": "Rather than returning empty tables or hallucinating registry entries when no candidates exist, the capability pivots to BIAN reference patterns, a registry-entry draft template, and explicit citability labeling ([BIAN baseline]). The strongest single section in the skill — designed for real usage scenarios, not just the happy path."}, {"title": "Tone modulation by capability", "detail": "The agent explicitly shifts register between capabilities: consultative in architectural-consultation, adversarial-but-collegial in adversarial-review, clinical/auditor in compliance-check. These are stated directly in each prompt — not implicit expectations — enabling sophisticated intra-skill voice management that is rarely seen at this level of execution."}, {"title": "Activation sequence design and knowledge-status architecture", "detail": "The seven-step On Activation sequence is logically ordered and operationally complete. The knowledge_status construct built in Step 5 is a lightweight reusable routing signal shared by all capability prompts, avoiding redundant I/O across capability transitions. Degraded-mode handling in each capability file mirrors the same flags established in Step 5."}, {"title": "On-demand capability loading with zero prompt waste", "detail": "All five capabilities are loaded only when needed. Pre-pass confirmed zero waste patterns, zero back-references, zero wall-of-text blocks across all 10,850 tokens. A compliance-check session never loads artifact-generation content. This is correct progressive disclosure architecture executed without exception."}, {"title": "Inter-capability routing graph", "detail": "Each capability explicitly names natural next capabilities with clear routing conditions, creating a navigable workflow graph rather than isolated functions. The five-capability loop (reuse-discovery → architectural-consultation → artifact-generation → adversarial-review → compliance-check) mirrors how real enterprise architecture work unfolds."}], "detailed_analysis": {"structure": {"assessment": "All required sections are present, correctly ordered, and well-scoped. The five capability files each include config headers, 'What Success Looks Like,' Degraded Mode, Anti-Patterns, Completion Criteria, and structured Output Format — unusually thorough. Zero issues detected by pre-pass. One medium finding (Russian prefix in frontmatter description) and three low findings (Identity as CV rather than priming sentence; config tokens in Communication Style before resolution; landscape-drift-scan lacks dedicated reference section).", "findings": [{"severity": "medium", "file": "SKILL.md:3", "title": "Frontmatter description language mixing", "detail": "Description opens with Russian sentence before the English 'Use when' trigger phrase, risking unpredictable harness routing behavior."}, {"severity": "low", "file": "SKILL.md:16", "title": "Identity section is a role description, not a persona prime", "detail": "Dense multi-clause paragraph listing expertise domains reads as a CV rather than a concise one-sentence behavioral anchor."}, {"severity": "low", "file": "SKILL.md:28", "title": "Communication Style references unresolved config tokens", "detail": "{communication_language} and {document_output_language} appear in a behavior-priming section before activation Steps resolve them. Architectural choice — acceptable if harness resolves config before applying persona sections."}, {"severity": "low", "file": "SKILL.md:10 + Step 7", "title": "--headless:landscape-drift-scan has no dedicated capability-file section", "detail": "Two of three headless modes have dedicated sections in capability files; landscape-drift-scan is documented only inline in SKILL.md Step 7."}]}, "persona": {"assessment": "Overview is lean-but-sufficient at 5 lines, written as a mission brief with a direct 'Your Mission' anchor. The persona block (Identity + Communication Style + Principles) is coherent and load-bearing — three voiced communication examples are distinctly architectural in register. All five capability prompts are self-contained and apply citability through capability-appropriate mechanisms. One medium finding: artifact-generation.md at 320 lines is more than double other capability prompts due to three full document templates embedded inline.", "overview_quality": "appropriate", "findings": [{"severity": "medium", "file": "references/artifact-generation.md:103–313", "title": "Three full document templates embedded inline", "detail": "ADR, Solution Design, and ARB Package templates (~183 fenced lines) embedded in procedural prompt make it 320 lines — more than double any other capability. Extract to references/templates/ subdirectory to decouple template maintenance from procedural guidance."}, {"severity": "medium", "file": "SKILL.md:8–12", "title": "Overview is capability enumeration rather than theory-of-mind framing", "detail": "Overview tells what Archon does but not why it matters or how its judgment is calibrated. Expanding by 3–4 sentences to include the core drift-detection model and citability constraint would ground capability routing and persona initialization more firmly."}, {"severity": "low", "file": "SKILL.md:60", "title": "Persistent facts warning disposition is ambiguous", "detail": "Missing file: entries produce a 'warning, not fail' but no specification of where warnings surface or whether they appear in Knowledge Disclosure. A silent miss could cause the agent to operate without facts it believes are loaded."}, {"severity": "low", "file": "references/compliance-check.md:35–43", "title": "Compliance scope filter is illustrative, not deterministic", "detail": "The domain-to-regulation mapping provides examples but not a decision rule. Adding an explicit rule (if ПДн in scope → 152-FZ required; card data → PCI DSS required) converts an illustrative hint into an actionable decision procedure."}]}, "cohesion": {"assessment": "Persona-capability alignment is strong across all five capabilities. The five-capability loop is coherent and well-connected. One medium finding: consultation → artifact-generation handoff is missing from completion criteria. One low finding: drift detection during consultation is reactive rather than proactive. Headless modes demonstrate forward-thinking design for governance automation.", "dimensions": {"persona_capability_alignment": {"score": "strong", "notes": "20-year architect identity, TOGAF/BIAN fluency, and citability principle map directly onto what each capability requires. No capabilities feel orphaned from the persona."}, "capability_completeness": {"score": "strong", "notes": "Five capabilities form a complete architectural engagement loop: reuse-discovery → consultation → artifact-generation → adversarial-review → compliance-check. One workflow gap: no lightweight drift flag during active consultation before final recommendation."}, "redundancy": {"score": "moderate", "notes": "Genuine functional overlap between architectural-consultation and artifact-generation (both ask discovery questions, anchor to landscape, reference reuse candidates). Distinction is clear in routing table but missing handoff creates a silent journey gap."}, "external_integration": {"score": "strong", "notes": "Three headless modes provide clean CI/CD integration points. {agent.on_assessment_complete} hook pattern throughout all capabilities provides a clean post-processing extension point."}, "capability_granularity": {"score": "strong", "notes": "Five capabilities is the right number. Each operates at a meaningfully different level of abstraction and serves a distinct user intent. None could be merged without losing important surface area."}}, "findings": [{"severity": "medium", "file": "references/architectural-consultation.md", "title": "Missing handoff: architectural-consultation → artifact-generation", "detail": "Completion criteria only suggest proceeding to adversarial-review. The most common post-consultation action — formalizing the chosen option into an ADR or Solution Design — is not mentioned."}, {"severity": "medium", "file": "references/architectural-consultation.md Approach", "title": "Drift detection is reactive, not proactive during consultation", "detail": "Options are discussed and a trade-off matrix is formed before target architecture alignment is checked. Adding an explicit sub-step to check each option against {agent.target_architecture_path} before finalizing the matrix would surface drift inline rather than deferring to output."}, {"severity": "low", "file": "SKILL.md Step 7 / references/", "title": "Headless landscape-drift-scan behavior is underspecified", "detail": "compliance-audit has a detailed reference section in compliance-check.md. landscape-drift-scan has only a one-line description in SKILL.md. Teams wanting scheduled drift scanning have no reference for output format, scope, or prioritization logic."}]}, "efficiency": {"assessment": "Pre-pass found zero dependency-cycle or sequential-pattern issues. On-demand capability loading and selective knowledge-base deferral are correctly implemented. Four findings — three medium (sequential activation loads, artifact-generation anchoring re-reads, headless arb-prep sequential batch) and one low (no index-first pattern for compliance corpus) — all resolve to the same root cause: independent reads presented as ordered sequences.", "findings": [{"severity": "medium", "file": "SKILL.md Step 5 (lines 72–78)", "title": "Sequential knowledge loading of three independent files at activation", "detail": "Three knowledge bases (target_architecture, architecture_principles, landscape_registry) have no dependency on each other but are loaded sequentially. Batching reduces activation latency by ~2x on the file-loading step."}, {"severity": "medium", "file": "references/artifact-generation.md lines 65–69", "title": "Anchoring step re-reads already-loaded knowledge bases sequentially", "detail": "The Anchoring в Bank Context section lists the same three knowledge bases from activation as sequential reads. If already in context from Step 5, these are redundant; if not, they should be batched."}, {"severity": "medium", "file": "references/artifact-generation.md line 318", "title": "--headless:arb-prep lists 4 reads with no parallelization hint", "detail": "Four independent reads (artifact + 3 knowledge bases) presented as a sequential list. In headless mode — no interactive dialog — all four can be batched in one round-trip."}, {"severity": "low", "file": "references/compliance-check.md line 35", "title": "No index-first pattern for compliance corpus", "detail": "Without a manifest or directory listing, the agent must either load everything or make judgment calls from filenames alone. An index-first pattern avoids loading 2–4 irrelevant compliance documents per session."}]}, "experience": {"assessment": "The agent is well-suited to its primary expert user archetype. Expert and automation journeys are well-served once discovered. Friction exists for first-timers (capability menu without natural-language examples), confused users (no out-of-scope handling), edge-case users with large inputs (no scope-limiting step), and automators (Markdown-only output, no exit-code contract). Headless modes are 'easily adaptable' — the intent is right, the output contracts are not yet CI/CD-grade.", "journeys": [{"archetype": "first-timer", "summary": "A developer asked to 'run their ADR by Archon' encounters five capability choices with architectural vocabulary and no natural-language routing examples. May accidentally land in consultation instead of adversarial review.", "friction_points": ["Five capability choices without plain-language descriptions or routing examples", "Whiteboard-architect greeting tone assumes peer-level understanding", "No routing confirmation before committing to a capability mode"], "bright_spots": ["Degraded mode produces labeled gaps rather than hallucinated citations — honest output even with no knowledge files", "Each capability prompt is self-contained and states its purpose in the first paragraph"]}, {"archetype": "expert", "summary": "A principal architect needing a fast ARB package finds the headless shortcut buried in artifact-generation.md. The expert discovery dialog fast-path exists but requires knowing to push through it.", "friction_points": ["--headless:arb-prep shortcut is buried in artifact-generation.md with no quick-reference in SKILL.md routing", "Discovery dialog is the default even for experts who have already answered all questions mentally"], "bright_spots": ["--headless:arb-prep flow is genuinely powerful: read artifact, read three knowledge sources, produce complete ARB package", "Handoff chain (adversarial-review → compliance-check → save) maps cleanly to how experts sequence their work"]}, {"archetype": "confused", "summary": "A product manager asking about vendor selection is absorbed into architectural-consultation without explicit out-of-scope handling, potentially receiving plausible but misaligned output.", "friction_points": ["No explicit out-of-scope handling for non-architectural inputs", "No Capture-Don't-Interrupt mechanism for off-topic questions", "Persona directness may feel dismissive without a 'not sure where to start?' affordance"], "bright_spots": ["Menu-codes (AC, AR, CC, RD, AG) could be surfaced to users as a quick self-selection tool"]}, {"archetype": "edge-case", "summary": "An architect submitting a 40-page Solution Design covering three nested sub-decisions gets an 8-axis adversarial review across the entire document with no scope-limiting step or grouping by component.", "friction_points": ["No scope-definition step before 8-axis adversarial review — large documents produce unwieldy flat finding lists", "No guidance on splitting multi-initiative inputs into focused reviews", "Artifact-generation discovery dialog asks about systems once but provides no guidance for 15-system inputs"], "bright_spots": ["Eight-axis structure provides natural grouping potential — findings could be organized by axis then severity"]}, {"archetype": "hostile-environment", "summary": "A fresh install with no knowledge files shows Knowledge Disclosure but provides no path to remedy — no config key references, no setup guide, no explicit 'general knowledge mode' acknowledgment.", "friction_points": ["Knowledge Disclosure block shown but no guidance on how to remedy missing files", "reuse-discovery fallback to architectural-consultation in degraded mode also requires landscape_registry for its reuse-map step", "Step 1 script fallback to manual TOML parsing produces no user-facing message about which path was taken"], "bright_spots": ["Every capability has a Degraded Mode section — far better than most agents", "Greenfield Mode in reuse-discovery avoids the dead-end of three empty tables"]}, {"archetype": "automator", "summary": "A governance team setting up nightly --headless:compliance-audit finds Markdown-only output with no structured severity summary, no exit-code contract, and no error handling for unwritable output paths.", "friction_points": ["All headless output is Markdown — no structured format for CI pipeline consumption", "No exit-code contract for blocker findings — CI gates cannot rely on process exit status", "No error handling spec for unwritable output path or on_assessment_complete failure", "No headless dry-run mode for pipeline testing", "landscape-drift-scan has no schema — two runs may produce differently structured output"], "bright_spots": ["Three headless modes cover the most valuable automation scenarios (drift detection, compliance audit, ARB prep)", "{agent.on_assessment_complete} as a configurable hook is the right extension point for CI integration"]}], "autonomous": {"potential": "easily-adaptable", "notes": "Three defined headless modes show clear intent and cover the most valuable governance automation scenarios. The agent is classified as 'easily adaptable' rather than 'headless-ready' because structured output contracts (YAML summary, exit codes, error handling) are missing. Adding a 10-line YAML front-matter spec to each headless mode would make them CI/CD-grade without changing any analytical logic."}, "findings": [{"severity": "high", "area": "On Activation / Step 7 routing", "title": "Missing first-use onboarding path", "detail": "When all three knowledge files are missing, agent shows Knowledge Disclosure then offers capabilities. No setup mode walks users through providing paths. New users get a functional-looking interface that produces degraded output for every request with no clear remedy."}, {"severity": "high", "area": "Headless modes (all three)", "title": "No structured output contract for headless consumers", "detail": "All headless output is Markdown prose. CI pipelines cannot reliably parse severity counts, drift counts, or compliance statuses. No exit-code contract for blocker findings prevents CI gates."}, {"severity": "high", "area": "Step 7 routing", "title": "Capability routing has no confirmation step for ambiguous input", "detail": "Purely intent-based routing with no soft confirmation before loading a capability. Confused users receive a full output in the wrong mode before realizing the mismatch."}, {"severity": "medium", "area": "adversarial-review, artifact-generation", "title": "No scope-limiting step for large or multi-initiative inputs", "detail": "Neither capability asks users to define scope boundary before beginning. Large Solution Designs trigger all eight adversarial axes across the entire document, producing reports with signal buried in volume."}, {"severity": "medium", "area": "architectural-consultation output format", "title": "Trade-off matrix lacks quantitative scaffolding", "detail": "Trade-off axes have no scoring guidance or scale. Output becomes incomparable across sessions and hard to present to business stakeholders."}, {"severity": "medium", "area": "Cross-capability transitions", "title": "Handoff chain lacks state preservation", "detail": "Each capability starts fresh with no structured handoff of context from prior capability. Multi-capability sessions result in repeated discovery questions."}]}, "scripts": {"assessment": "Zero scripts exist in the skill. Six script opportunities identified across activation and capability paths. Priority 1: activation_prepass.py bundle (knowledge-status assembly + glob expansion + date/slug generation, 200–500 tokens saved per session). Priority 2: scan_registry.py (registry scan pre-pass, 200–400 tokens per reuse/consultation invocation, serves three capabilities). Priority 3: resolve_config.py local fallback (eliminates 500–800 token TOML-merge LLM tax when external script unavailable).", "token_savings": "450–1,000 tokens per typical session (1 activation + 1 reuse-discovery + 1 compliance-check)", "findings": [{"severity": "high", "file": "SKILL.md lines 48–52", "title": "Manual TOML merge fallback — 500–800 tokens per incident", "detail": "LLM instructed to manually resolve agent config block by reading three TOML files and applying merge-rule semantics. Pure data transformation with no semantic judgment. External resolve_customization.py already exists for this purpose; fallback path should not be an LLM task."}, {"severity": "medium", "file": "SKILL.md Steps 3+5+7", "title": "Knowledge status assembly — 100–200 tokens per activation", "detail": "File-existence checking and string templating for Knowledge Disclosure block are fully deterministic. A check_knowledge_status.py script emitting JSON status and pre-rendered disclosure block eliminates this LLM tax entirely."}, {"severity": "medium", "file": "SKILL.md lines 58–60", "title": "Glob expansion for persistent_facts — 100–300 tokens per activation", "detail": "Glob expansion is a filesystem operation with no judgment involved. A script receives the persistent_facts list, expands file: globs using pathlib.Path.glob(), and emits resolved file paths as JSON."}, {"severity": "medium", "file": "references/reuse-discovery.md lines 52–54", "title": "Landscape registry scan — 200–400 tokens per invocation", "detail": "Filtering structured registry data on capability_area/domain fields is a textbook script task. scan_registry.py serves three capabilities: reuse-discovery, architectural-consultation, and adversarial-review."}, {"severity": "low", "file": "references/compliance-check.md lines 35–36", "title": "Compliance checklist scope determination — 50–100 tokens", "detail": "Domain-to-regulation mapping is a rule-based lookup. A < 30-line domain-classifier function converts the illustrative hint into a deterministic filter. Bundle into activation_prepass.py."}, {"severity": "low", "file": "references/artifact-generation.md lines 107, 166, 250", "title": "Date stamping and filename slug generation — < 50 tokens", "detail": "YYYYMMDD is pure clock-reading; slug generation is a deterministic string transformation. Bundle into any existing pre-pass script."}]}}, "recommendations": [{"rank": 1, "action": "Restructure SKILL.md Step 5 to batch all three knowledge-base reads in one parallel call, reword artifact-generation anchoring step to cross-reference already-loaded bases, and add explicit parallel-batch instruction to --headless:arb-prep", "resolves": 4, "effort": "low"}, {"rank": 2, "action": "Add YAML front-matter summary block (run_date, mode, knowledge_status, summary counts) and exit-failure contract for blocker findings to all three headless modes; add Headless: --headless:landscape-drift-scan section to architectural-consultation.md or a new references/landscape-drift.md", "resolves": 5, "effort": "low"}, {"rank": 3, "action": "Build activation_prepass.py bundle script covering knowledge-status assembly, glob expansion for persistent_facts, and date/slug generation — eliminating the consistent per-session LLM tax", "resolves": 3, "effort": "medium"}, {"rank": 4, "action": "Add artifact-generation as a handoff option in architectural-consultation completion criteria; define a lightweight session context object (initiative slug, systems, compliance flags, options) that capabilities write to and read from at the start", "resolves": 4, "effort": "medium"}, {"rank": 5, "action": "Add load step for {agent.compliance_corpus_path} to adversarial-review.md (mirroring compliance-check.md line 35), or document in customize.toml that the field is consumed only by compliance-check capability", "resolves": 1, "effort": "low"}, {"rank": 6, "action": "Add adr_index_path and arb_next_session_date string scalars to customize.toml; add one-line comment to strategy_path clarifying which capabilities consume it", "resolves": 3, "effort": "low"}, {"rank": 7, "action": "Move 'Use when' clause to start of SKILL.md frontmatter description; add conditional setup path in Step 7 for fresh installs with all three knowledge files missing; add single-sentence routing confirmation before loading any capability prompt", "resolves": 3, "effort": "low"}, {"rank": 8, "action": "Extract three document templates from artifact-generation.md to references/templates/ subdirectory (adr-template.md, solution-design-template.md, arb-package-template.md) and replace inline blocks with load-by-path instructions", "resolves": 1, "effort": "medium"}]}</script>
+<script>
+const RAW = JSON.parse(document.getElementById('report-data').textContent);
+const DATA = normalize(RAW);
+
+function normalize(d) {
+  if (d.meta) {
+    d.meta.skill_name = d.meta.skill_name || d.meta.skill || d.meta.name || 'Unknown';
+    d.meta.scanner_count = typeof d.meta.scanner_count === 'number' ? d.meta.scanner_count
+      : Array.isArray(d.meta.scanners_run) ? d.meta.scanners_run.length
+      : d.meta.scanner_count || 0;
+  }
+  d.strengths = (d.strengths || []).map(s =>
+    typeof s === 'string' ? { title: s, detail: '' } : { title: s.title || '', detail: s.detail || '' }
+  );
+  (d.opportunities || []).forEach(o => {
+    o.name = o.name || o.title || '';
+    o.finding_count = o.finding_count || (o.findings || o.findings_resolved || []).length;
+    if (!o.findings && o.findings_resolved) o.findings = [];
+    o.action = o.action || o.fix || '';
+  });
+  (d.broken || []).forEach(b => {
+    b.detail = b.detail || b.description || '';
+    b.action = b.action || b.fix || '';
+  });
+  (d.recommendations || []).forEach((r, i) => {
+    r.action = r.action || r.description || '';
+    r.rank = r.rank || i + 1;
+  });
+  // Fix journeys
+  if (d.detailed_analysis && d.detailed_analysis.experience) {
+    d.detailed_analysis.experience.journeys = (d.detailed_analysis.experience.journeys || []).map(j => ({
+      archetype: j.archetype || j.persona || j.name || 'Unknown',
+      summary: j.summary || j.journey_summary || j.description || j.friction || '',
+      friction_points: j.friction_points || (j.friction ? [j.friction] : []),
+      bright_spots: j.bright_spots || (j.bright ? [j.bright] : [])
+    }));
+  }
+  // Fix capabilities
+  (d.capabilities || []).forEach(c => {
+    c.finding_count = c.finding_count || (c.findings || []).length;
+    c.status = c.status || (c.finding_count > 0 ? 'needs-attention' : 'good');
+  });
+  return d;
+}
+
+function esc(s) {
+  if (!s) return '';
+  const d = document.createElement('div');
+  d.textContent = String(s);
+  return d.innerHTML;
+}
+
+function init() {
+  const m = DATA.meta;
+  document.getElementById('skill-name').textContent = m.skill_name;
+  document.getElementById('subtitle').innerHTML =
+    `${esc(m.skill_path)} &bull; ${m.timestamp ? m.timestamp.split('T')[0] : ''} &bull; ${m.scanner_count || 0} scanners &bull; <a href="quality-report.md">Full Report &nearr;</a>`;
+
+  renderPortrait();
+  document.getElementById('grade-area').innerHTML = `<div class="grade grade-${DATA.grade}">${esc(DATA.grade)}</div>`;
+  document.getElementById('narrative').textContent = DATA.narrative || '';
+
+  renderCapabilities();
+  renderBroken();
+  renderOpportunities();
+  renderStrengths();
+  renderRecommendations();
+  renderDetailed();
+}
+
+function renderPortrait() {
+  const p = DATA.agent_profile;
+  if (!p) return;
+  let html = `<div class="portrait"><div class="portrait-header">`;
+  if (p.icon) html += `<span class="portrait-icon">${esc(p.icon)}</span>`;
+  html += `<div><div class="portrait-name">${esc(p.display_name)}</div>`;
+  if (p.title) html += `<div class="portrait-title">${esc(p.title)}</div>`;
+  html += `</div></div>`;
+  if (p.portrait) html += `<div class="portrait-desc">${esc(p.portrait)}</div>`;
+  html += `</div>`;
+  document.getElementById('portrait').innerHTML = html;
+}
+
+function renderCapabilities() {
+  const caps = DATA.capabilities || [];
+  if (!caps.length) return;
+  const good = caps.filter(c => c.status === 'good').length;
+  const attn = caps.length - good;
+  let summary = `${caps.length} capabilities`;
+  if (attn > 0) summary += ` \u00b7 ${attn} need attention`;
+
+  let html = `<div class="section"><div class="section-header open" onclick="toggleSection(this)">`;
+  html += `<span class="arrow">&#9654;</span><span class="label">Capabilities (${summary})</span>`;
+  html += `</div><div class="section-body open">`;
+  caps.forEach((cap, idx) => {
+    const statusBadge = cap.status === 'good'
+      ? `<span class="badge badge-good">Good</span>`
+      : `<span class="badge badge-attention">${cap.finding_count} observation${cap.finding_count !== 1 ? 's' : ''}</span>`;
+    const hasFindings = cap.findings && cap.findings.length > 0;
+    html += `<div class="cap-row" ${hasFindings ? `onclick="toggleCapFindings(${idx})" style="cursor:pointer"` : ''}>`;
+    html += `${statusBadge} <span class="cap-name">${esc(cap.name)}</span>`;
+    if (cap.file) html += `<span class="cap-file">${esc(cap.file)}</span>`;
+    html += `</div>`;
+    if (hasFindings) {
+      html += `<div class="cap-findings" id="cap-findings-${idx}">`;
+      cap.findings.forEach(f => {
+        html += `<div class="cap-finding">`;
+        if (f.severity) html += `<span class="badge badge-${f.severity}">${esc(f.severity)}</span> `;
+        html += `${esc(f.title)}`;
+        if (f.source) html += ` <span class="source" style="font-size:0.75rem;color:var(--text-dim)">[${esc(f.source)}]</span>`;
+        html += `</div>`;
+      });
+      html += `</div>`;
+    }
+  });
+  html += `</div></div>`;
+  document.getElementById('capabilities-section').innerHTML = html;
+}
+
+function renderBroken() {
+  const items = DATA.broken || [];
+  if (!items.length) return;
+  let html = `<div class="section"><div class="section-header open" onclick="toggleSection(this)">`;
+  html += `<span class="arrow">&#9654;</span><span class="label">Broken / Critical (${items.length})</span>`;
+  html += `<div class="actions"><button class="btn btn-primary" onclick="event.stopPropagation();showBrokenPrompt()">Fix These</button></div>`;
+  html += `</div><div class="section-body open">`;
+  items.forEach(item => {
+    const loc = item.file ? `${item.file}${item.line ? ':'+item.line : ''}` : '';
+    html += `<div class="item"><span class="badge badge-${item.severity || 'high'}">${esc(item.severity || 'high')}</span> `;
+    if (loc) html += `<span class="item-file">${esc(loc)}</span>`;
+    html += `<div class="item-title">${esc(item.title)}</div>`;
+    if (item.detail) html += `<div class="item-desc">${esc(item.detail)}</div>`;
+    if (item.action) html += `<div class="item-action"><strong>Fix:</strong> ${esc(item.action)}</div>`;
+    html += `</div>`;
+  });
+  html += `</div></div>`;
+  document.getElementById('broken-section').innerHTML = html;
+}
+
+function renderOpportunities() {
+  const opps = DATA.opportunities || [];
+  if (!opps.length) return;
+  let html = `<div class="section"><div class="section-header open" onclick="toggleSection(this)">`;
+  html += `<span class="arrow">&#9654;</span><span class="label">Opportunities (${opps.length})</span>`;
+  html += `</div><div class="section-body open">`;
+  opps.forEach((opp, idx) => {
+    html += `<div class="opp"><div class="opp-header">`;
+    html += `<span class="badge badge-${opp.severity || 'medium'}">${esc(opp.severity || 'medium')}</span>`;
+    html += `<span class="opp-name">${idx+1}. ${esc(opp.name)}</span>`;
+    html += `<span class="opp-count">${opp.finding_count || (opp.findings||[]).length} observations</span>`;
+    html += `<button class="btn" onclick="toggleFindings(${idx})">Details</button>`;
+    html += `<button class="btn btn-primary" onclick="showThemePrompt(${idx})">Fix This</button>`;
+    html += `</div>`;
+    html += `<div class="opp-desc">${esc(opp.description)}</div>`;
+    if (opp.impact) html += `<div class="opp-impact">Impact: ${esc(opp.impact)}</div>`;
+    html += `<div class="opp-findings" id="findings-${idx}">`;
+    (opp.findings || []).forEach(f => {
+      const loc = f.file ? `${f.file}${f.line ? ':'+f.line : ''}` : '';
+      html += `<div class="opp-finding"><strong>${esc(f.title)}</strong>`;
+      if (loc) html += ` <span class="item-file">${esc(loc)}</span>`;
+      if (f.source) html += ` <span class="source">[${esc(f.source)}]</span>`;
+      if (f.detail) html += `<br>${esc(f.detail)}`;
+      html += `</div>`;
+    });
+    html += `</div></div>`;
+  });
+  html += `</div></div>`;
+  document.getElementById('opportunities-section').innerHTML = html;
+}
+
+function renderStrengths() {
+  const items = DATA.strengths || [];
+  if (!items.length) return;
+  let html = `<div class="section"><div class="section-header" onclick="toggleSection(this)">`;
+  html += `<span class="arrow">&#9654;</span><span class="label">Strengths (${items.length})</span>`;
+  html += `</div><div class="section-body">`;
+  items.forEach(s => {
+    html += `<div class="strength-item"><div class="title">${esc(s.title)}</div>`;
+    if (s.detail) html += `<div class="detail">${esc(s.detail)}</div>`;
+    html += `</div>`;
+  });
+  html += `</div></div>`;
+  document.getElementById('strengths-section').innerHTML = html;
+}
+
+function renderRecommendations() {
+  const recs = DATA.recommendations || [];
+  if (!recs.length) return;
+  let html = `<div class="section"><div class="section-header open" onclick="toggleSection(this)">`;
+  html += `<span class="arrow">&#9654;</span><span class="label">Recommendations</span>`;
+  html += `</div><div class="section-body open"><div class="recs">`;
+  recs.forEach(r => {
+    html += `<div class="rec"><span class="rec-rank">#${r.rank}</span>${esc(r.action)}`;
+    if (r.resolves) html += ` <span class="rec-resolves">(resolves ${r.resolves} observations)</span>`;
+    html += `</div>`;
+  });
+  html += `</div></div></div>`;
+  document.getElementById('recommendations-section').innerHTML = html;
+}
+
+function renderDetailed() {
+  const da = DATA.detailed_analysis;
+  if (!da) return;
+  const dims = [
+    ['structure', 'Structure & Capabilities'],
+    ['persona', 'Persona & Voice'],
+    ['cohesion', 'Identity Cohesion'],
+    ['efficiency', 'Execution Efficiency'],
+    ['experience', 'Conversation Experience'],
+    ['scripts', 'Script Opportunities']
+  ];
+  let html = `<div class="section"><div class="section-header" onclick="toggleSection(this)">`;
+  html += `<span class="arrow">&#9654;</span><span class="label">Detailed Analysis</span>`;
+  html += `</div><div class="section-body">`;
+  dims.forEach(([key, label]) => {
+    const dim = da[key];
+    if (!dim) return;
+    html += `<div class="analysis-section"><h4>${label}</h4>`;
+    if (dim.assessment) html += `<p>${esc(dim.assessment)}</p>`;
+    if (dim.dimensions) {
+      html += `<table style="width:100%;font-size:0.85rem;margin:0.5rem 0;border-collapse:collapse;">`;
+      html += `<tr><th style="text-align:left;padding:0.3rem;border-bottom:1px solid var(--border)">Dimension</th><th style="text-align:left;padding:0.3rem;border-bottom:1px solid var(--border)">Score</th><th style="text-align:left;padding:0.3rem;border-bottom:1px solid var(--border)">Notes</th></tr>`;
+      Object.entries(dim.dimensions).forEach(([d, v]) => {
+        if (v && typeof v === 'object') {
+          html += `<tr><td style="padding:0.3rem;border-bottom:1px solid var(--border)">${esc(d.replace(/_/g,' '))}</td><td style="padding:0.3rem;border-bottom:1px solid var(--border)">${esc(v.score||'')}</td><td style="padding:0.3rem;border-bottom:1px solid var(--border)">${esc(v.notes||'')}</td></tr>`;
+        }
+      });
+      html += `</table>`;
+    }
+    if (dim.journeys && dim.journeys.length) {
+      dim.journeys.forEach(j => {
+        html += `<div style="margin:0.5rem 0"><strong>${esc(j.archetype)}</strong>: ${esc(j.summary || j.journey_summary || '')}`;
+        if (j.friction_points && j.friction_points.length) {
+          html += `<ul style="color:var(--high);font-size:0.85rem;padding-left:1.25rem">`;
+          j.friction_points.forEach(fp => { html += `<li>${esc(fp)}</li>`; });
+          html += `</ul>`;
+        }
+        html += `</div>`;
+      });
+    }
+    if (dim.autonomous) {
+      const a = dim.autonomous;
+      html += `<p><strong>Headless Potential:</strong> ${esc(a.potential||'')}`;
+      if (a.notes) html += ` \u2014 ${esc(a.notes)}`;
+      html += `</p>`;
+    }
+    (dim.findings || []).forEach(f => {
+      const loc = f.file ? `${f.file}${f.line ? ':'+f.line : ''}` : '';
+      html += `<div class="analysis-finding">`;
+      if (f.severity) html += `<span class="badge badge-${f.severity}">${esc(f.severity)}</span> `;
+      html += `${esc(f.title)}`;
+      if (loc) html += ` <span class="item-file">${esc(loc)}</span>`;
+      html += `</div>`;
+    });
+    html += `</div>`;
+  });
+  html += `</div></div>`;
+  document.getElementById('detailed-section').innerHTML = html;
+}
+
+function toggleSection(el) { el.classList.toggle('open'); el.nextElementSibling.classList.toggle('open'); }
+function toggleFindings(idx) { document.getElementById('findings-'+idx).classList.toggle('open'); }
+function toggleCapFindings(idx) { document.getElementById('cap-findings-'+idx).classList.toggle('open'); }
+
+function showThemePrompt(idx) {
+  const opp = DATA.opportunities[idx];
+  if (!opp) return;
+  let prompt = `## Task: ${opp.name}\nAgent path: ${DATA.meta.skill_path}\n\n### Problem\n${opp.description}\n\n### Fix\n${opp.action}\n\n`;
+  if (opp.findings && opp.findings.length) {
+    prompt += `### Specific observations to address:\n\n`;
+    opp.findings.forEach((f, i) => {
+      const loc = f.file ? (f.line ? `${f.file}:${f.line}` : f.file) : '';
+      prompt += `${i+1}. **${f.title}**`;
+      if (loc) prompt += ` (${loc})`;
+      if (f.detail) prompt += `\n   ${f.detail}`;
+      prompt += `\n`;
+    });
+  }
+  document.getElementById('modal-title').textContent = `Fix: ${opp.name}`;
+  document.getElementById('modal-content').textContent = prompt.trim();
+  document.getElementById('modal').classList.add('visible');
+}
+
+function showBrokenPrompt() {
+  const items = DATA.broken || [];
+  let prompt = `## Task: Fix Critical Issues\nAgent path: ${DATA.meta.skill_path}\n\n`;
+  items.forEach((item, i) => {
+    const loc = item.file ? (item.line ? `${item.file}:${item.line}` : item.file) : '';
+    prompt += `${i+1}. **[${(item.severity||'high').toUpperCase()}] ${item.title}**\n`;
+    if (loc) prompt += `   File: ${loc}\n`;
+    if (item.detail) prompt += `   Context: ${item.detail}\n`;
+    if (item.action) prompt += `   Fix: ${item.action}\n\n`;
+  });
+  document.getElementById('modal-title').textContent = 'Fix Critical Issues';
+  document.getElementById('modal-content').textContent = prompt.trim();
+  document.getElementById('modal').classList.add('visible');
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('visible'); }
+function copyModal() {
+  navigator.clipboard.writeText(document.getElementById('modal-content').textContent).then(() => {
+    const btn = document.querySelector('.modal .btn-primary');
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = 'Copy to Clipboard'; }, 1500);
+  });
+}
+
+init();
+</script>
+</body>
+</html>

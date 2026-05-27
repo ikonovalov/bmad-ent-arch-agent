@@ -1,0 +1,125 @@
+{
+  "scanner": "structure-capabilities-prepass",
+  "script": "prepass-structure-capabilities.py",
+  "version": "1.0.0",
+  "skill_path": "skills\\agent-archon",
+  "timestamp": "2026-05-27T16:17:28.075581+00:00",
+  "status": "pass",
+  "metadata": {
+    "frontmatter": {
+      "name": "agent-archon",
+      "description": "\u041a\u043e\u0440\u043f\u043e\u0440\u0430\u0442\u0438\u0432\u043d\u044b\u0439 \u0430\u0440\u0445\u0438\u0442\u0435\u043a\u0442\u043e\u0440 \u0431\u0430\u043d\u043a\u0430, \u043a\u043e\u0442\u043e\u0440\u044b\u0439 \u0432\u043f\u0438\u0441\u044b\u0432\u0430\u0435\u0442 \u0438\u043d\u0438\u0446\u0438\u0430\u0442\u0438\u0432\u044b \u0432 \u0443\u0442\u0432\u0435\u0440\u0436\u0434\u0451\u043d\u043d\u0443\u044e \u0446\u0435\u043b\u0435\u0432\u0443\u044e \u0430\u0440\u0445\u0438\u0442\u0435\u043a\u0442\u0443\u0440\u0443. Use when the user asks to talk to Archon, requests architectural consultation, ADR or Solution Design review, compliance check, or reuse discovery in the bank's landscape."
+    },
+    "sections": [
+      {
+        "level": 2,
+        "title": "Overview",
+        "line": 8
+      },
+      {
+        "level": 2,
+        "title": "Identity",
+        "line": 14
+      },
+      {
+        "level": 2,
+        "title": "Communication Style",
+        "line": 18
+      },
+      {
+        "level": 2,
+        "title": "Principles",
+        "line": 30
+      },
+      {
+        "level": 2,
+        "title": "Conventions",
+        "line": 38
+      },
+      {
+        "level": 2,
+        "title": "On Activation",
+        "line": 46
+      },
+      {
+        "level": 3,
+        "title": "Step 1: Resolve the Agent Block",
+        "line": 48
+      },
+      {
+        "level": 3,
+        "title": "Step 2: Execute Prepend Steps",
+        "line": 54
+      },
+      {
+        "level": 3,
+        "title": "Step 3: Load Persistent Facts",
+        "line": 58
+      },
+      {
+        "level": 3,
+        "title": "Step 4: Load Config",
+        "line": 62
+      },
+      {
+        "level": 3,
+        "title": "Step 5: Load Bank Knowledge",
+        "line": 70
+      },
+      {
+        "level": 3,
+        "title": "Step 6: Execute Append Steps",
+        "line": 88
+      },
+      {
+        "level": 3,
+        "title": "Step 7: Routing",
+        "line": 92
+      },
+      {
+        "level": 2,
+        "title": "Capabilities",
+        "line": 113
+      }
+    ],
+    "is_memory_agent": false
+  },
+  "prompt_details": [
+    {
+      "file": "adversarial-review.md",
+      "has_config_header": true,
+      "has_progression": true
+    },
+    {
+      "file": "architectural-consultation.md",
+      "has_config_header": true,
+      "has_progression": true
+    },
+    {
+      "file": "artifact-generation.md",
+      "has_config_header": true,
+      "has_progression": true
+    },
+    {
+      "file": "compliance-check.md",
+      "has_config_header": true,
+      "has_progression": true
+    },
+    {
+      "file": "reuse-discovery.md",
+      "has_config_header": true,
+      "has_progression": true
+    }
+  ],
+  "memory_paths": [],
+  "issues": [],
+  "summary": {
+    "total_issues": 0,
+    "by_severity": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    }
+  }
+}

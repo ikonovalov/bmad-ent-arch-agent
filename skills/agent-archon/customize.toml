@@ -62,7 +62,8 @@ architecture_principles_path = "{project-root}/docs/architecture/principles.md"
 compliance_corpus_path = "{project-root}/docs/compliance/"
 
 # Стратегия развития банка 3–5 лет, операционная модель, цифровая
-# трансформация, roadmap'ы ключевых доменов. Загружается по требованию.
+# трансформация, roadmap'ы ключевых доменов. Загружается по требованию
+# capabilities: architectural-consultation, artifact-generation.
 strategy_path = "{project-root}/docs/strategy.md"
 
 # --- Output destination ---
@@ -77,3 +78,14 @@ assessment_output_path = "{project-root}/_bmad-output/archon/"
 # Например: уведомить ARB, открыть тикет в Jira, обновить дашборд.
 # Пусто = ничего не делать.
 on_assessment_complete = ""
+
+# --- Artifact-generation settings ---
+
+# Индекс существующих ADR-записей банка для определения следующего порядкового
+# номера без коллизий. Должен быть файлом с перечнем ADR-{NNN}.
+# Пусто = Archon назначит номер по контексту или укажет [NEEDS INPUT: ADR index not configured].
+adr_index_path = ""
+
+# Ближайшая дата ARB-сессии (YYYY-MM-DD). Подставляется в ARB Package как
+# дата рассмотрения. Пусто = Archon напишет TBD.
+arb_next_session_date = ""

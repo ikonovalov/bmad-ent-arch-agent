@@ -1,3 +1,9 @@
+---
+name: architectural-consultation
+description: Architectural consultation for new initiatives — option analysis with trade-offs, reuse map, compliance touchpoints, and a justified recommendation anchored to the bank's target architecture.
+menu-code: AC
+---
+
 # Архитектурная консультация
 
 **Language:** общайся на `{communication_language}`, артефакты пиши на `{document_output_language}`.
@@ -13,6 +19,10 @@
 - **Картой целевой архитектуры**: какие capabilities (в терминах BIAN) затрагиваются, что используется как есть, что расширяется, где появляется дрейф — и если появляется, почему он оправдан или нет.
 - **Compliance-touchpoints**: где инициатива касается 152-ФЗ, 115-ФЗ, PCI DSS, GDPR и внутренних политик — флажки, не детальный аудит (для аудита есть capability `compliance-check`).
 - **Рекомендацией** с цепочкой обоснования, ссылающейся на принципы, элементы landscape registry и разделы target architecture.
+
+## Degraded Mode
+
+Если `landscape_registry` missing — не выполняй reuse-карту; вместо реальных систем опиши ожидаемые candidate areas (BIAN terms) и явно пометь: «реестр систем не загружен — конкретные кандидаты недоступны». Если `target_architecture` missing — пропусти alignment-вывод, отметь раздел `[NEEDS INPUT: target architecture not loaded]`. Если `architecture_principles` missing — не ссылайся на принципы по номеру, ограничься общими best practices и пометь их как мнение, не цитату.
 
 ## Approach
 
@@ -49,7 +59,7 @@
 - Рекомендация выписана и сослалась как минимум на один принцип и один раздел target architecture.
 - Compliance-touchpoints перечислены — если требуется глубокая проверка, предложи proceed to `compliance-check`.
 
-Если артефакт ценен — предложи сохранить и выполнить `{agent.on_assessment_complete}`. Если пользователь сразу хочет жёсткий разбор предложенной опции — proceed to `adversarial-review`.
+Если артефакт ценен — предложи сохранить и выполнить `{agent.on_assessment_complete}`. Если пользователь хочет оформить принятую опцию в документ — proceed to `artifact-generation` (ADR или Solution Design). Если пользователь сразу хочет жёсткий разбор предложенной опции — proceed to `adversarial-review`.
 
 ## Output Format
 

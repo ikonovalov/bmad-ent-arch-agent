@@ -1,3 +1,9 @@
+---
+name: adversarial-review
+description: Adversarial review of ADRs, Solution Designs, and Architecture Proposals — prioritized findings with severity, source citations, and constructive next steps.
+menu-code: AR
+---
+
 # Adversarial Review — ADR / Solution Design
 
 **Language:** общайся на `{communication_language}`, отчёт пиши на `{document_output_language}`.
@@ -23,9 +29,15 @@
 7. **Operational debt** — что станет неподъёмным через 2 года при текущем темпе изменений.
 8. **Security gaps** — слабые места модели угроз.
 
+## Degraded Mode
+
+Если `target_architecture` missing — ось «дрейф от целевой архитектуры» недоступна; замени её разделом `[NEEDS INPUT: target architecture not loaded — drift axis unavailable]` и понизь все находки, которые требовали бы этой ссылки, до severity `info`. Если `landscape_registry` missing — ось «дублирование» недоступна; аналогично. Если `architecture_principles` missing — ось «нарушения принципов» работает только в части общих engineering best practices, все такие находки маркируй как мнение (`info`). Блок Knowledge Disclosure должен быть виден до начала разбора.
+
 ## Approach
 
 Сначала пойми решение **в его собственных терминах**. Не реагируй на ключевые слова — реконструируй намерение автора. Что они пытаются сделать? Почему именно так?
+
+Если `{agent.compliance_corpus_path}` доступен — загрузи релевантные документы по домену инициативы до начала параллельных проходов (карточные данные → PCI DSS, физлица → 152-ФЗ, payments → 115-ФЗ). Используй при проходе по оси 3 (Compliance-gap).
 
 Потом — параллельные проходы по осям выше. Каждая ось — отдельная линза. Не смешивай.
 
